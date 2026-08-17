@@ -1,0 +1,36 @@
+# Build context hygiene. Without this, `docker build` uploads ~420 MB
+# (388 MB of it is .venv, which the image rebuilds from requirements.txt anyway).
+
+# Virtualenvs — the image runs `pip install -r requirements.txt` itself
+.venv/
+venv/
+
+# Python bytecode / test caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Git metadata
+.git/
+.gitignore
+
+# Course material — the running service never reads lessons/
+lessons/
+scratch/
+docs/
+
+# Local caches and generated artifacts
+data/.llm_cache/
+**/chroma_db/
+
+# Editor / OS junk
+.vscode/
+.idea/
+.DS_Store
+
+# Secrets — injected at runtime via env_file / secrets manager, never baked in
+.env
+.env.local
+
+# Compose file is not needed inside the image
+docker-compose.yml

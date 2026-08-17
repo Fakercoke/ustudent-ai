@@ -1,0 +1,22 @@
+
+============================================================================================
+LLM-as-judge · golden (8 题) · temperature=0
+============================================================================================
+  OK  g1   answered  How many credits do I need to graduate?         
+        judge: The system answer includes all the facts from the reference and adds extra correct details.
+  OK  g2   answered  What is the maximum credits I can take in one   
+        judge: The system answer states the same facts as the reference.
+  OK  g3   answered  Can a freshman take CS201?                      
+        judge: The system answer states the same facts as the reference.
+  OK  g4   answered  How is GPA calculated?                          
+        judge: The system answer states the same facts as the reference.
+  OK  g5   answered  What is the difference between dropping and wi  
+        judge: The system answer states the same facts as the reference.
+  OK  g6   answered  When is the last day to drop a course with a f  
+        judge: The system answer states the same fact as the reference.
+  OK  g7   refused   What AWS region does the ustudent system run i  
+        judge: System answer properly declines to answer the question.
+  OK  g8   refused   How do I appeal a final grade?                  
+        judge: The system answer correctly declines to answer the question and refers the student elsewhere.
+--------------------------------------------------------------------------------------------
+=== 8/8  (100%) ===

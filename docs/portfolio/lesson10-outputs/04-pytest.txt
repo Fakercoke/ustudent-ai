@@ -1,0 +1,20 @@
+tests/test_health.py .                                                   [ 19%]
+tests/test_lesson5_embedding.py ..............                           [ 29%]
+tests/test_rag_ask.py ............                                       [ 37%]
+tests/test_rag_index.py ..............                                   [ 47%]
+tests/test_rag_pipeline_contract.py ...................                  [ 60%]
+tests/test_rag_query.py ..............                                   [ 70%]
+tests/test_safety.py ..........................................          [100%]
+
+=============================== warnings summary ===============================
+.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /Users/wangwuchen/Desktop/ustudent-ai/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+tests/test_rag_index.py: 30 warnings
+tests/test_rag_query.py: 2 warnings
+  /Users/wangwuchen/Desktop/ustudent-ai/.venv/lib/python3.12/site-packages/chromadb/types.py:144: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    return self.model_fields  # pydantic 2.x
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 143 passed, 33 warnings in 3.87s =======================

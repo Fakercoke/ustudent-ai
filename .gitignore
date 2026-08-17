@@ -85,3 +85,7 @@ lessons/**/README.md
 
 # 课程方提供的运维手册（讲师撰写），不随作品集公开
 docs/runbook-*.md
+
+# 构建时用的模型缓存，体积大且可重新下载，不进版本库
+vendor/chroma-onnx/*
+!vendor/chroma-onnx/.gitkeep

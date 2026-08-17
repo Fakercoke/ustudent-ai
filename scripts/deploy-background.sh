@@ -35,7 +35,8 @@ if [ "${1:-}" = "status" ]; then
 fi
 
 # ─────────────────────────────────────────────── guard
-if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+if [ "${1:-}" != "_worker" ] && \
+   [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
   echo "已经在跑了 (pid $(cat "$PIDFILE"))。看进度：tail -f $LOG"
   exit 0
 fi
@@ -86,8 +87,17 @@ run() {
   echo "=== 部署完成 ==="
 }
 
+# Re-enter this script in the background instead of serialising only the
+# function definition into a fresh shell.  The previous approach lost the
+# REPO/VENDOR/MODEL_URL variables, so curl received an empty URL and retried
+# forever with "URL rejected: Malformed input".
+if [ "${1:-}" = "_worker" ]; then
+  run
+  exit 0
+fi
+
 : > "$LOG"
-nohup bash -c "$(declare -f run); run" >> "$LOG" 2>&1 &
+nohup bash "$0" _worker >> "$LOG" 2>&1 &
 echo $! > "$PIDFILE"
 
 cat <<INFO

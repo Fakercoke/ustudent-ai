@@ -148,6 +148,13 @@ def chat(
         "messages": messages,
         "temperature": temperature,
     }
+    # DeepSeek V4 enables thinking mode by default.  Tool-call continuations in
+    # that mode require replaying provider-specific reasoning_content, which a
+    # generic OpenAI-compatible client/agent does not preserve.  Non-thinking
+    # mode keeps JSON output and tool calls while retaining portable message
+    # semantics across providers.
+    if "api.deepseek.com" in s.llm_base_url:
+        kwargs["extra_body"] = {"thinking": {"type": "disabled"}}
     if response_format is not None:
         kwargs["response_format"] = response_format
 

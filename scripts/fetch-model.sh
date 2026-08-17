@@ -13,7 +13,7 @@
 set -euo pipefail
 
 DEST="$(cd "$(dirname "$0")/.." && pwd)/vendor/chroma-onnx/all-MiniLM-L6-v2/onnx"
-REPO_PATH="sentence-transformers/all-MiniLM-L6-v2/resolve/main/onnx"
+REPO_PATH="sentence-transformers/all-MiniLM-L6-v2/resolve/main"
 MIRRORS=("https://hf-mirror.com" "https://huggingface.co")
 
 # 文件名 期望字节数（用于校验，宁可重下也不要半截文件进镜像）
@@ -33,6 +33,10 @@ for entry in "${FILES[@]}"; do
   name="${entry%% *}"
   want="${entry##* }"
   out="$DEST/$name"
+  # Hugging Face stores only the ONNX weights under /onnx. Tokenizer and
+  # configuration files live at the repository root.
+  remote_path="$name"
+  [ "$name" != "model.onnx" ] || remote_path="onnx/$name"
 
   if [ -f "$out" ] && [ "$(stat -c%s "$out" 2>/dev/null || stat -f%z "$out")" -ge "$((want * 95 / 100))" ]; then
     printf '  ✓ %-24s 已存在 %s\n' "$name" "$(du -h "$out" | cut -f1)"
@@ -47,7 +51,7 @@ for entry in "${FILES[@]}"; do
     if curl -fL --continue-at - \
             --retry 20 --retry-delay 3 --retry-all-errors \
             --speed-limit 2000 --speed-time 30 --connect-timeout 15 \
-            --progress-bar -o "$out" "$base/$REPO_PATH/$name"; then
+            --progress-bar -o "$out" "$base/$REPO_PATH/$remote_path"; then
       got=$(stat -c%s "$out" 2>/dev/null || stat -f%z "$out")
       if [ "$got" -ge "$((want * 95 / 100))" ]; then ok=1; break; fi
       printf '    大小不对（%s，期望约 %s），换下一个源\n' "$got" "$want"

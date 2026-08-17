@@ -133,11 +133,19 @@ policy information. Never claim enrolment succeeded unless enrol returned a
 success message. If a tool returns an error or rejection, report it honestly.
 """
 
+_base_url = os.environ.get("LLM_BASE_URL", "https://api.groq.com/openai/v1")
+_extra_body = (
+    {"thinking": {"type": "disabled"}}
+    if "api.deepseek.com" in _base_url
+    else None
+)
+
 llm = ChatOpenAI(
     api_key=os.environ["LLM_API_KEY"],
-    base_url=os.environ.get("LLM_BASE_URL", "https://api.groq.com/openai/v1"),
-    model=os.environ.get("LLM_MODEL", "llama-3.3-70b-versatile"),
+    base_url=_base_url,
+    model=os.environ.get("LLM_MODEL", "openai/gpt-oss-120b"),
     temperature=0.1,
+    extra_body=_extra_body,
 )
 
 # Module-level memory is shared by calls to chat(). Different thread IDs keep

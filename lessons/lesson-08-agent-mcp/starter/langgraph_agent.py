@@ -13,7 +13,7 @@ from langgraph.prebuilt import create_react_agent
 
 API_KEY = os.environ["LLM_API_KEY"]
 BASE_URL = os.environ.get("LLM_BASE_URL", "https://api.groq.com/openai/v1")
-MODEL = os.environ.get("LLM_MODEL", "llama-3.3-70b-versatile")
+MODEL = os.environ.get("LLM_MODEL", "openai/gpt-oss-120b")
 
 SYSTEM_PROMPT = """\
 You are the ustudent course-enrolment assistant.

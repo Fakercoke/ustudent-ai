@@ -4,8 +4,12 @@
 ARG BASE_IMAGE=ustudent-ai:latest
 FROM ${BASE_IMAGE}
 
+# Remove all old runtime source first so deleted files and macOS AppleDouble
+# metadata from an earlier image cannot survive an overlay release.
+RUN rm -rf /app/app /app/data /app/scripts /app/chroma_db
+
 COPY app/ /app/app/
 COPY data/ /app/data/
 COPY scripts/ /app/scripts/
 
-RUN rm -rf /app/chroma_db && python /app/scripts/build_index.py
+RUN python /app/scripts/build_index.py

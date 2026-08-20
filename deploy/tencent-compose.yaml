@@ -83,5 +83,6 @@ services:
 volumes:
   postgres_data:
     name: uplus-postgres-data
+    external: true
   ai_ops_data:
     name: ustudent-ai-ops

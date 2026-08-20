@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ustudent AI · RAG 运营后台</title>
+  <style>
+    :root{--ink:#14213d;--muted:#68738a;--line:#dfe5ef;--paper:#fff;--bg:#f4f7fb;--blue:#1649a3;--cyan:#0d87a8;--green:#16855b;--amber:#b76b00;--red:#c23d4b;--shadow:0 10px 30px rgba(31,52,92,.08)}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+    header{background:linear-gradient(125deg,#0d2e67,#165eb5);color:#fff;padding:28px max(24px,calc((100vw - 1240px)/2));display:flex;justify-content:space-between;gap:20px;align-items:center}
+    h1{font-size:25px;margin:0 0 5px}.subtitle{opacity:.78}.header-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    select,button,a.button{font:inherit;border:1px solid rgba(255,255,255,.28);border-radius:9px;padding:8px 12px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none;cursor:pointer}select option{color:#111;background:#fff}
+    main{max-width:1240px;margin:24px auto;padding:0 24px 56px}.notice{background:#e8f1ff;border:1px solid #bfd4f4;border-radius:12px;padding:13px 16px;margin-bottom:18px;color:#244977}
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card,.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}.card{padding:17px}.label{color:var(--muted);font-size:12px}.value{font-weight:750;font-size:26px;margin:5px 0 0}.hint{font-size:12px;color:var(--muted);margin-top:3px}
+    .panels{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;margin-top:16px}.panel{padding:20px;overflow:hidden}.panel h2{font-size:17px;margin:0 0 4px}.panel .desc{color:var(--muted);font-size:12px;margin-bottom:18px}
+    .chart{height:180px;display:flex;align-items:flex-end;gap:9px;border-bottom:1px solid var(--line);padding:0 5px}.bar-wrap{height:100%;flex:1;min-width:26px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}.bar-value{font-size:10px;color:var(--muted)}.bar{width:min(28px,70%);min-height:2px;border-radius:6px 6px 0 0;background:linear-gradient(#2d78d5,#1649a3)}.bar-label{font-size:10px;color:var(--muted);margin:7px 0 -22px}
+    .diagnoses{display:grid;gap:9px}.diag{display:grid;grid-template-columns:12px 1fr auto;gap:10px;align-items:center;padding:9px 11px;border:1px solid var(--line);border-radius:9px}.dot{width:10px;height:10px;border-radius:50%;background:var(--blue)}.diag-name{font-weight:650}.diag-help{display:block;color:var(--muted);font-size:11px}.diag-count{font-size:17px;font-weight:700}
+    .evals{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.eval{background:#f7f9fd;border-radius:10px;padding:12px}.eval strong{font-size:21px;display:block}.empty{color:var(--muted);padding:20px 0}
+    table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:600;background:#fafbfe}td.preview{max-width:320px;word-break:break-word}.tag{display:inline-block;border-radius:999px;padding:2px 7px;background:#e8f1ff;color:#174c93;white-space:nowrap}.tag.warn{background:#fff1d7;color:#855000}.tag.bad{background:#ffe5e8;color:#9b2e3a}.tag.good{background:#def5e9;color:#176b4a}
+    .guide{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.guide-item{border-left:4px solid var(--blue);background:#f8faff;padding:11px 13px;border-radius:7px}.guide-item b{display:block;margin-bottom:3px}.guide-item span{color:var(--muted);font-size:12px}.footnote{margin-top:15px;color:var(--muted);font-size:11px}.full{grid-column:1/-1}.error{background:#ffe8eb;color:#8c2432;padding:14px;border-radius:10px}
+    @media(max-width:1000px){.grid{grid-template-columns:repeat(3,1fr)}.panels{grid-template-columns:1fr}}@media(max-width:600px){header{align-items:flex-start;flex-direction:column}.grid{grid-template-columns:repeat(2,1fr)}main{padding:0 12px}.guide{grid-template-columns:1fr}.table-wrap{overflow:auto}}
+  </style>
+</head>
+<body>
+  <header>
+    <div><h1>ustudent AI · RAG 运营后台</h1><div class="subtitle">看使用情况，更重要的是看问题发生在检索、阈值、生成、Agent 还是系统层。</div></div>
+    <div class="header-actions">
+      <select id="days" aria-label="统计周期"><option value="1">最近 24 小时</option><option value="7" selected>最近 7 天</option><option value="30">最近 30 天</option><option value="90">最近 90 天</option></select>
+      <button id="refresh">刷新</button><a class="button" id="report" href="/ops/report?days=7" target="_blank">打印周报</a><a class="button" id="download" href="/ops/report.md?days=7">下载 Markdown</a>
+    </div>
+  </header>
+  <main>
+    <div class="notice">口径提醒：线上后台能发现“可疑”和“失败发生在哪层”，不能自动证明回答正确。真正的 RAG 正确率看下面的固定评测集。</div>
+    <div id="error"></div>
+    <section class="grid">
+      <div class="card"><div class="label">React 网页访问</div><div class="value" id="pageViews">—</div><div class="hint" id="webHint">等待 Nginx 日志</div></div>
+      <div class="card"><div class="label">AI/API 请求</div><div class="value" id="requests">—</div><div class="hint" id="visitors">匿名请求来源 —</div></div>
+      <div class="card"><div class="label">RAG 已回答</div><div class="value" id="answered">—</div><div class="hint" id="ragTotal">共 — 次 RAG</div></div>
+      <div class="card"><div class="label">RAG 兜底率</div><div class="value" id="fallback">—</div><div class="hint">越高越需要看问题分层</div></div>
+      <div class="card"><div class="label">平均响应时间</div><div class="value" id="latency">—</div><div class="hint">包含检索与模型调用</div></div>
+      <div class="card"><div class="label">LLM Token</div><div class="value" id="tokens">—</div><div class="hint" id="calls">— 次模型调用</div></div>
+      <div class="card"><div class="label">估算费用</div><div class="value" id="cost">—</div><div class="hint" id="costHint">按 .env 单价计算</div></div>
+      <div class="card"><div class="label">服务端错误</div><div class="value" id="errors">—</div><div class="hint">HTTP 5xx 请求</div></div>
+    </section>
+
+    <section class="panels">
+      <div class="panel"><h2>每日请求与响应趋势</h2><div class="desc">柱高是 AI/API 请求量；每根柱子上方显示当天请求数。</div><div class="chart" id="chart"></div><div class="diagnoses" id="paths" style="margin-top:28px"></div></div>
+      <div class="panel"><h2>问题分层</h2><div class="desc">先知道坏在哪一层，再决定改代码、阈值、模型还是数据。</div><div class="diagnoses" id="diagnoses"></div></div>
+      <div class="panel"><h2>离线 RAG 质量</h2><div class="desc">由固定 dev / golden 评测集产生，不用线上距离冒充正确率。</div><div id="evals"></div></div>
+      <div class="panel"><h2>最常召回的章节</h2><div class="desc">帮助发现 FAQ 首页等章节是否异常“吸流量”。</div><div class="diagnoses" id="sources"></div></div>
+      <div class="panel full"><h2>最近请求诊断</h2><div class="desc">只保存最多 200 字的有限正则脱敏预览和匿名调用方哈希，不保存原始请求体或原始 IP。</div><div class="table-wrap"><table><thead><tr><th>时间</th><th>接口</th><th>问题预览</th><th>Top-1 距离</th><th>Token</th><th>Agent 工具</th><th>诊断</th><th>耗时</th></tr></thead><tbody id="recent"></tbody></table></div></div>
+      <div class="panel full"><h2>看到问题后改哪里？</h2><div class="desc">这是你的排障地图，不需要盯着全部 Python 代码猜。</div><div class="guide">
+        <div class="guide-item"><b>retrieval_empty / distance_gate</b><span>先看 sources、向量库是否建好、embedding 是否一致、查询是否需要归一化；不要先改 Prompt。</span></div>
+        <div class="guide-item"><b>model_abstention</b><span>距离已通过当前阈值，但模型认为资料不足。人工看 sources：资料真的够，再改回答 Prompt；资料不够，仍是检索问题。</span></div>
+        <div class="guide-item"><b>generation_failure / llm_error</b><span>检索已经完成，检查 DeepSeek Key、余额、模型名、超时和 JSON 返回；不要重建向量库。</span></div>
+        <div class="guide-item"><b>security_block</b><span>系统在模型调用前拦住了疑似提示词注入。检查被召回文档，不要简单关闭安全规则。</span></div>
+        <div class="guide-item"><b>Agent 工具结果不对</b><span>看 tool_calls：工具没选对就改 Agent 路由说明；工具选对但结果错，就查后端 API 或工具函数。</span></div>
+        <div class="guide-item"><b>线上都正常但评测下降</b><span>对比 dev 与 golden；检查最近改过的切块、embedding、阈值、模型和提示词，避免只对少量题调参。</span></div>
+      </div><div class="footnote">费用只有在 .env 配置当前模型单价后才显示；单价变化时只改配置，不需要改代码。网页主系统的完整访问量需要由入口 Nginx 接入，本页当前统计 AI 服务和其落地页收到的请求。</div></div>
+    </section>
+  </main>
+  <script>
+    const diagnosis = {
+      system_error:["系统错误","查应用日志和服务状态","bad"], invalid_request:["请求格式错误","检查输入字段与前端请求","warn"],
+      security_block:["安全拦截","检查召回资料中的提示词注入","bad"], generation_failure:["生成失败","查大模型接口和 JSON 返回","bad"],
+      llm_error:["模型调用错误","查 Key、额度、网络和模型名","bad"], retrieval_empty:["没有召回","查向量库构建与持久化","bad"],
+      distance_gate:["距离门槛拒答","Top-1 超过当前阈值，查查询和召回","warn"], model_abstention:["模型二次拒答","人工判断 sources 是否足够","warn"],
+      rag_answered:["RAG 已回答","正确性仍由评测或人工判断","good"], agent_tool_used:["Agent 调过工具","通过 tool trace 继续判断","good"], ok:["正常请求","无需处理","good"]
+    };
+    const el=id=>document.getElementById(id); const text=(id,v)=>el(id).textContent=v;
+    const fmt=n=>new Intl.NumberFormat('zh-CN').format(n||0); const pct=n=>(100*(n||0)).toFixed(1)+'%';
+    function clear(node){while(node.firstChild)node.removeChild(node.firstChild)}
+    function render(data){
+      el('error').textContent=''; const o=data.overview,r=data.rag,l=data.llm;
+      text('pageViews',data.web.available?fmt(data.web.page_views):'未接入');text('webHint',data.web.available?'Nginx 页面请求'+(data.web.partial?'（日志超限，统计不完整）':'')+'；5xx '+fmt(data.web.errors):'不拿 API 调用冒充 PV');text('requests',fmt(o.requests));text('visitors','匿名请求来源 '+fmt(o.unique_callers)+'（非访客数）');text('answered',fmt(r.answered));text('ragTotal','共 '+fmt(r.requests)+' 次 RAG');
+      text('fallback',pct(r.fallback_rate));text('latency',fmt(Math.round(o.avg_latency_ms))+' ms');text('tokens',fmt(l.total_tokens));text('calls',fmt(l.calls)+' 次模型调用');
+      text('cost',l.cost_configured?Number(l.estimated_cost).toLocaleString('zh-CN',{minimumFractionDigits:4,maximumFractionDigits:6})+' '+l.currency:'未配置');text('costHint',l.cost_configured?(l.cost_note||'按当前 .env 单价估算'):'Token 正常；请在 .env 填单价');text('errors',fmt(o.server_errors));
+      const chart=el('chart');clear(chart);const max=Math.max(1,...data.daily.map(x=>x.requests));
+      if(!data.daily.length){const e=document.createElement('div');e.className='empty';e.textContent='暂无数据';chart.appendChild(e)}
+      data.daily.forEach(d=>{const w=document.createElement('div');w.className='bar-wrap';const v=document.createElement('div');v.className='bar-value';v.textContent=d.requests;const b=document.createElement('div');b.className='bar';b.style.height=Math.max(2,d.requests/max*135)+'px';b.title=`${d.date}: ${d.requests} 次，平均 ${d.avg_latency_ms} ms`;const lab=document.createElement('div');lab.className='bar-label';lab.textContent=d.date.slice(5);w.append(v,b,lab);chart.appendChild(w)});
+      const paths=el('paths');clear(paths);if(!data.web.available)paths.append(empty('React 主站 Nginx 日志尚未接入'));else if(!data.web.top_paths.length)paths.append(empty('当前周期暂无页面访问'));else data.web.top_paths.slice(0,4).forEach(x=>paths.append(diag('页面 '+x.path,'访问次数',x.count,'')));
+      const diags=el('diagnoses');clear(diags);if(!data.diagnoses.length)diags.append(empty('暂无请求数据'));
+      data.diagnoses.forEach(d=>{const meta=diagnosis[d.name]||[d.name,'查看最近请求',''];diags.append(diag(meta[0],meta[1],d.count,meta[2]))});
+      const evals=el('evals');clear(evals);if(!data.latest_evals.length){const e=empty('尚未运行评测。部署后执行：python scripts/eval_rag.py both');evals.append(e)}
+      data.latest_evals.forEach(v=>{const title=document.createElement('b');title.textContent=v.set+' · '+v.questions+' 题';const box=document.createElement('div');box.className='panel';box.style.marginBottom='10px';const grid=document.createElement('div');grid.className='evals';[['拒答准确',v.refusal_accuracy],['检索命中',v.retrieval_hit],['答案落地',v.answer_grounded]].forEach(([n,x])=>{const c=document.createElement('div');c.className='eval';const s=document.createElement('span');s.textContent=n;const strong=document.createElement('strong');strong.textContent=pct(x);c.append(s,strong);grid.append(c)});box.append(title,grid);evals.append(box)});
+      const sources=el('sources');clear(sources);if(!data.top_sources.length)sources.append(empty('暂无召回记录'));data.top_sources.forEach(x=>sources.append(diag(x.heading,'被召回次数',x.count,'')));
+      const recent=el('recent');clear(recent);data.recent.forEach(v=>{const tr=document.createElement('tr');const meta=diagnosis[v.diagnosis]||[v.diagnosis,'',''];[new Date(v.time).toLocaleString(),v.endpoint,v.input_preview||'—',v.top1_distance==null?'—':Number(v.top1_distance).toFixed(3),fmt(v.tokens),(v.tools||[]).join(', ')||'—',meta[0],Math.round(v.latency_ms)+' ms'].forEach((value,i)=>{const td=document.createElement('td');td.textContent=value;if(i===2)td.className='preview';if(i===6){td.className='tag '+meta[2];td.title=meta[1]}tr.appendChild(td)});recent.appendChild(tr)});
+    }
+    function empty(s){const d=document.createElement('div');d.className='empty';d.textContent=s;return d}
+    function diag(name,help,count,kind){const d=document.createElement('div');d.className='diag';const dot=document.createElement('span');dot.className='dot';if(kind==='bad')dot.style.background='var(--red)';if(kind==='warn')dot.style.background='var(--amber)';if(kind==='good')dot.style.background='var(--green)';const body=document.createElement('div');const n=document.createElement('span');n.className='diag-name';n.textContent=name;const h=document.createElement('span');h.className='diag-help';h.textContent=help;body.append(n,h);const c=document.createElement('span');c.className='diag-count';c.textContent=count;d.append(dot,body,c);return d}
+    async function load(){el('refresh').disabled=true;try{const days=el('days').value;const base=location.origin;el('report').href=new URL('/ops/report?days='+days,base).href;el('download').href=new URL('/ops/report.md?days='+days,base).href;const api=new URL('/ops/api/summary?days='+days,base);const response=await fetch(api,{cache:'no-store',credentials:'same-origin'});if(!response.ok)throw new Error('后台返回 '+response.status);render(await response.json())}catch(e){el('error').className='error';el('error').textContent='加载失败：'+e.message}finally{el('refresh').disabled=false}}
+    el('refresh').addEventListener('click',load);el('days').addEventListener('change',load);load();setInterval(load,60000);
+  </script>
+</body>
+</html>

@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Iterator, TypedDict
 
 import chromadb
+from chromadb.utils.embedding_functions import ONNXMiniLM_L6_V2
 
 ROOT = Path(__file__).resolve().parents[2]
 DB_DIR = ROOT / "data/chroma_db"
@@ -29,6 +30,14 @@ CHUNK_SIZE = 600
 CHUNK_OVERLAP = 100
 
 _HEADING = re.compile(r"^(#{1,6})\s+(.*)$")
+
+# Chroma otherwise picks every locally available ONNX provider.  On macOS that
+# can select CoreML, while Linux/Docker uses CPU, making tests and deployment
+# behave differently.  The model itself is unchanged; fixing the execution
+# provider makes local, CI and cloud runs reproducible.
+_EMBEDDING_FUNCTION = ONNXMiniLM_L6_V2(
+    preferred_providers=["CPUExecutionProvider"]
+)
 
 
 class Chunk(TypedDict):
@@ -106,7 +115,9 @@ def get_client(path: Path | str = DB_DIR):
 def get_collection(client):
     """cosine keeps distances in [0, 2]; Chroma's default squared-L2 is harder to read."""
     return client.get_or_create_collection(
-        COLLECTION, metadata={"hnsw:space": "cosine"}
+        COLLECTION,
+        metadata={"hnsw:space": "cosine"},
+        embedding_function=_EMBEDDING_FUNCTION,
     )
 
 

@@ -15,6 +15,7 @@ together tell them apart:
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
+from app.ops.context import annotate_input
 from app.rag.pipeline import (
     DISTANCE_THRESHOLD,
     MAX_QUESTION_CHARS,
@@ -62,6 +63,7 @@ class RagAskResponse(BaseModel):
 
 @router.post("/rag-ask", response_model=RagAskResponse)
 def rag_ask(req: RagAskRequest) -> RagAskResponse:
+    annotate_input(req.question)
     result = rag_answer(req.question, k=req.k)
     return RagAskResponse(
         answer=result.answer,

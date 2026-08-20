@@ -66,12 +66,17 @@ services:
     environment:
       # Compose-internal DNS — the backend container is reachable at this name.
       USTUDENT_BACKEND_URL: http://ustudent-backend:8080
+      OPS_DB_PATH: /app/runtime/ops.sqlite3
     ports:
       - "8000:8000"
+    volumes:
+      - ai_ops_data:/app/runtime
     depends_on:
       - ustudent-backend
     restart: unless-stopped
 
 volumes:
   postgres_data:
+    driver: local
+  ai_ops_data:
     driver: local

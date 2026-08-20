@@ -29,6 +29,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.rag.pipeline import rag_answer  # noqa: E402
+from app.ops.store import save_eval_run  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 SETS = {
@@ -120,6 +121,9 @@ if __name__ == "__main__":
         raise SystemExit(1)
 
     results = [run(n) for n in names]
+    for metrics in results:
+        save_eval_run(metrics)
+    print("\n  评测结果已写入 /ops 运营后台。")
 
     if len(results) > 1:
         print(f"\n{'=' * 96}\n对比\n{'=' * 96}")

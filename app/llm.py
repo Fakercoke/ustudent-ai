@@ -29,6 +29,7 @@ from typing import Any
 from openai import APIStatusError, OpenAI, RateLimitError
 
 from app.config import get_settings
+from app.ops.context import record_llm_call
 
 log = logging.getLogger(__name__)
 
@@ -77,15 +78,40 @@ def _call_with_retry(**kwargs: Any) -> str:
     for attempt in range(max_retries):
         try:
             response = _client().chat.completions.create(**kwargs)
+            usage = getattr(response, "usage", None)
+            prompt_tokens = int(getattr(usage, "prompt_tokens", 0) or 0)
+            cached_prompt_tokens = int(
+                getattr(usage, "prompt_cache_hit_tokens", 0) or 0
+            )
+            # Some OpenAI-compatible providers put cached tokens inside
+            # prompt_tokens_details rather than at the usage top level.
+            details = getattr(usage, "prompt_tokens_details", None)
+            cached_prompt_tokens = max(
+                cached_prompt_tokens,
+                int(getattr(details, "cached_tokens", 0) or 0),
+            )
+            record_llm_call(
+                model=str(kwargs.get("model", "unknown")),
+                prompt_tokens=prompt_tokens,
+                cached_prompt_tokens=cached_prompt_tokens,
+                completion_tokens=int(getattr(usage, "completion_tokens", 0) or 0),
+                total_tokens=int(getattr(usage, "total_tokens", 0) or 0),
+            )
             return response.choices[0].message.content or ""
         except (RateLimitError, APIStatusError) as e:
             status = getattr(e, "status_code", None) or getattr(
                 getattr(e, "response", None), "status_code", None
             )
             if status is not None and status != 429:
+                record_llm_call(
+                    model=str(kwargs.get("model", "unknown")), success=False
+                )
                 raise
             last_exc = e
             if attempt == max_retries - 1:
+                record_llm_call(
+                    model=str(kwargs.get("model", "unknown")), success=False
+                )
                 raise
             wait = 4 * (2 ** attempt)
             log.warning(
@@ -93,6 +119,11 @@ def _call_with_retry(**kwargs: Any) -> str:
                 wait, attempt + 2, max_retries,
             )
             time.sleep(wait)
+        except Exception:
+            record_llm_call(
+                model=str(kwargs.get("model", "unknown")), success=False
+            )
+            raise
     assert last_exc is not None
     raise last_exc
 
@@ -141,6 +172,7 @@ def chat(
         cache_id = _cache_key(s.llm_base_url, model, payload, temperature)
         cached = _cache_get(cache_id)
         if cached is not None:
+            record_llm_call(model=model, cache_hit=True)
             return cached
 
     kwargs: dict[str, Any] = {

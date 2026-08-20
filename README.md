@@ -16,7 +16,7 @@
 
 | Engineering result | Measured outcome |
 |---|---:|
-| Automated tests | **143 passed** |
+| Automated tests | **158 passed** |
 | Held-out RAG evaluation | **8/8 (100%)** |
 | Development evaluation | **20/22 (91%)** |
 | Chinese retrieval distance | **0.684 → 0.270** |
@@ -31,7 +31,7 @@
 
 - Engineered a production-oriented RAG and LangGraph Agent service using FastAPI, ChromaDB and an OpenAI-compatible LLM client, enabling grounded policy Q&A, live course lookup, multi-turn memory and controlled enrolment actions.
 - Diagnosed multilingual and typo-related embedding failures through controlled chunking and vector-similarity experiments; introduced constrained query normalisation and a two-layer abstention strategy, improving Chinese retrieval distance from **0.684 to 0.270** and achieving **8/8 held-out evaluation accuracy**.
-- Built deterministic LLM-as-judge evaluation, PII redaction and prompt-injection screening with **143 automated tests**, then integrated the service with a course-provided React/Spring Boot/PostgreSQL system and deployed the four-service stack to Tencent Cloud using Docker Compose.
+- Built deterministic RAG evaluation, PII redaction, prompt-injection screening and a password-protected operations dashboard with **158 automated tests**, then integrated the service with a course-provided React/Spring Boot/PostgreSQL system and deployed the four-service stack to Tencent Cloud using Docker Compose.
 
 ## System architecture
 
@@ -64,6 +64,7 @@ Core capabilities:
 - **Provider-independent LLM client:** works with DeepSeek, Groq, OpenAI, or another OpenAI-compatible provider through environment configuration only.
 - **Evaluation:** separate development and held-out sets, deterministic LLM-as-judge scoring, disk caching, retrieval checks, groundedness checks, and regression tests.
 - **Safety:** PII redaction, prompt-injection screening of retrieved documents, untrusted-data boundaries, and separate fallback/degraded/blocked observability states.
+- **Operations:** request-level tracing, redacted query previews, RAG distance and failure-layer diagnosis, Agent tool traces, LLM token/cost accounting, offline eval history, and printable reports in a password-protected dashboard.
 - **Deployment:** multi-container Docker Compose deployment with a React UI, Spring Boot backend, PostgreSQL, reverse proxy, persistent storage, health checks, and restart recovery.
 
 ## Public API
@@ -76,6 +77,20 @@ Core capabilities:
 | `POST /ask`, `/ask/v2`, `/ask/v3` | Preserves three prompt-engineering stages: system prompt, few-shot prompting, and enforced JSON. |
 | `GET /health` | Container and deployment health probe. |
 | `GET /docs` | Swagger/OpenAPI documentation. |
+| `GET /ops` | Password-protected RAG quality, usage, token-cost and diagnosis dashboard. |
+
+## Operations and RAG quality dashboard
+
+The `/ops` dashboard joins signals from one request under the same request ID:
+
+```text
+HTTP request → retrieval distance/sources → fallback or answer
+             → Agent tool calls → LLM tokens/errors → diagnosis → SQLite
+```
+
+It separates live risk signals from true quality measurement. Live traffic can show an empty retrieval, distance-gate refusal, model abstention, generation failure, security block, latency and token usage; it cannot prove that a plausible answer is correct. Correctness is reported separately from the latest fixed `dev` and held-out `golden` evaluation runs. A privacy-minimal Nginx JSON log supplies React page-entry counts without IPs, query strings, referrers or user agents. Input previews receive limited regex-based PII redaction and are capped at 200 characters, client addresses are salted and hashed, and the dashboard remains disabled until `OPS_ADMIN_PASSWORD` and a private salt are configured.
+
+See the [Chinese operations and diagnosis guide](docs/operations-dashboard.md) for metric definitions and the incident workflow.
 
 ## The retrieval problem I diagnosed
 
@@ -177,7 +192,7 @@ app/
 data/                     handbook, FAQ and course catalogue
 data/golden/              evaluation datasets
 scripts/                  indexing, evaluation and deployment scripts
-tests/                    143 automated tests
+tests/                    158 automated tests
 docs/portfolio/           experiment records and interview notes
 ```
 
@@ -187,3 +202,4 @@ docs/portfolio/           experiment records and interview notes
 - Query rewriting adds latency and is a semantic black box. A rewrite can drift, especially for ambiguous one-word inputs.
 - The evaluation set is intentionally small; the current scores demonstrate regression control, not universal production accuracy.
 - The public demo currently uses an HTTP IP address. A domain, ICP filing, and HTTPS are deployment follow-ups.
+- React page views count server entries/reloads from the front Nginx. Pure client-side SPA route changes do not produce a server request and are therefore not counted as separate views.

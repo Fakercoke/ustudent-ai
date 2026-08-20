@@ -31,6 +31,7 @@ import re
 from dataclasses import dataclass, field
 
 from app.llm import chat
+from app.ops.context import annotate_rag
 from app.rag.index import Hit, search
 from app.rag.parse import parse_json_safe
 from app.rag.query import detect_language, needs_rewrite, rewrite_query
@@ -116,6 +117,12 @@ class RagResult:
     #: but "refused to process". Merging it into either would hide an attack
     #: signal inside ordinary traffic.
     blocked: bool = False
+
+
+def _observed(result: RagResult) -> RagResult:
+    """Attach diagnostics when called inside a web request, then pass through."""
+    annotate_rag(result, distance_threshold=DISTANCE_THRESHOLD)
+    return result
 
 
 def clean_question(question: str) -> str:
@@ -208,18 +215,20 @@ def rag_answer(
     question = clean_question(question)
     language = detect_language(question)
     if not question:
-        return RagResult(answer=FALLBACK_ANSWER["default"], used_fallback=True)
+        return _observed(
+            RagResult(answer=FALLBACK_ANSWER["default"], used_fallback=True)
+        )
 
     hits = retrieve(question, k=k)
 
     # Layer 1 — cheap gate. Nothing close came back, so do not pay for a
     # generation call that could only hallucinate.
     if not hits or hits[0]["distance"] > DISTANCE_THRESHOLD:
-        return RagResult(
+        return _observed(RagResult(
             answer=FALLBACK_ANSWER.get(language, FALLBACK_ANSWER["default"]),
             sources=hits,
             used_fallback=True,
-        )
+        ))
 
     # Layer 1b — screen the retrieved material before it is quoted to the model.
     # This is a high-risk path (the text is presented as authoritative), so a
@@ -227,12 +236,12 @@ def rag_answer(
     if flagged := screen_sources(hits):
         log.warning("prompt injection in retrieved material; request blocked: %s",
                     "; ".join(f"{cid} -> {m}" for cid, m in flagged))
-        return RagResult(
+        return _observed(RagResult(
             answer=BLOCKED_ANSWER.get(language, BLOCKED_ANSWER["default"]),
             sources=hits,
             used_fallback=True,
             blocked=True,
-        )
+        ))
 
     try:
         raw = chat(
@@ -250,14 +259,14 @@ def rag_answer(
         )
     except Exception as exc:  # noqa: BLE001
         log.warning("generation failed (%s); degrading to raw excerpts", exc)
-        return _degrade(hits, language)
+        return _observed(_degrade(hits, language))
 
     parsed = _parse(raw)
     if parsed is None:
         # Empty, non-JSON, or self-contradictory payload. Treat exactly like a
         # failed call — never surface an empty answer as a successful one.
         log.warning("unusable model response (%r); degrading", (raw or "")[:120])
-        return _degrade(hits, language)
+        return _observed(_degrade(hits, language))
 
     can_answer, answer = parsed
 
@@ -272,12 +281,12 @@ def rag_answer(
     # A structured flag, not a phrase to pattern-match: the answer is written in
     # the student's language, so "I don't know" never appears in a Chinese refusal.
     if not can_answer:
-        return RagResult(
+        return _observed(RagResult(
             answer=FALLBACK_ANSWER.get(language, FALLBACK_ANSWER["default"]),
             sources=hits,
             used_fallback=True,
-        )
-    return RagResult(answer=answer, sources=hits, used_fallback=False)
+        ))
+    return _observed(RagResult(answer=answer, sources=hits, used_fallback=False))
 
 
 def _degrade(hits: list[Hit], language: str) -> RagResult:

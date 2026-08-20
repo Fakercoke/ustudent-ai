@@ -71,6 +71,10 @@ services:
     environment:
       # Compose-internal DNS — `ustudent-backend` resolves to the backend container.
       USTUDENT_BACKEND_URL: http://ustudent-backend:8080
+      # Keep operations history when the AI image/container is replaced.
+      OPS_DB_PATH: /app/runtime/ops.sqlite3
+    volumes:
+      - ai_ops_data:/app/runtime
     ports:
       - "8000:8000"
     depends_on:
@@ -79,4 +83,6 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  ai_ops_data:
     driver: local

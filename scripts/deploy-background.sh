@@ -69,7 +69,8 @@ run() {
 
   docker rm -f ustudent-ai 2>/dev/null || true
   docker run -d --name ustudent-ai --restart unless-stopped \
-    --env-file "$REPO/.env" -p 8000:8000 --memory 1500m \
+    --env-file "$REPO/.env" -e OPS_DB_PATH=/app/runtime/ops.sqlite3 \
+    -v ustudent-ai-ops:/app/runtime -p 8000:8000 --memory 1500m \
     ustudent-ai:latest
 
   for i in $(seq 1 60); do

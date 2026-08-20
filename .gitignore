@@ -58,6 +58,8 @@ Thumbs.db
 # Secrets — NEVER commit
 .env
 .env.local
+.ops-credentials.txt
+.ops-deploy.env
 
 # Lesson 5+ vector store — binary sqlite, rebuilt with `build`, never commit
 chroma_db/
@@ -65,6 +67,9 @@ scratch/chroma_play/
 
 # Lesson 4 on-disk LLM response cache
 data/.llm_cache/
+
+# Runtime operations data; contains redacted request diagnostics, not source code
+data/ops.sqlite3*
 
 # Personal scratch scripts
 scratch/

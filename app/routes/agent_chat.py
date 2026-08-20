@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
 from app.agent.agent import chat_with_trace
+from app.ops.context import annotate_input, annotate_tools
 
 router = APIRouter()
 
@@ -25,7 +26,9 @@ class AgentChatResponse(BaseModel):
 
 @router.post("/agent-chat", response_model=AgentChatResponse)
 def agent_chat(req: AgentChatRequest) -> AgentChatResponse:
+    annotate_input(req.message)
     result = chat_with_trace(req.message, thread_id=req.thread_id)
+    annotate_tools(result["tool_calls"])
     return AgentChatResponse(
         answer=result["answer"],
         thread_id=req.thread_id,

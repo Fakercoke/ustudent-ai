@@ -1,0 +1,87 @@
+# Reproducible four-service layout used by the Tencent Cloud demo.
+# Secrets remain in /home/ubuntu/ustudent-ai/.env and are never copied here.
+name: uplus-stack
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: ustudent-postgres
+    restart: unless-stopped
+    mem_limit: 320m
+    environment:
+      POSTGRES_DB: ustudent
+      POSTGRES_USER: ustudent
+      POSTGRES_PASSWORD: ustudent123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ustudent -d ustudent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    image: uplusdockerhub/ustudent-backend:latest
+    container_name: ustudent-backend
+    restart: unless-stopped
+    mem_limit: 800m
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms128m -Xmx512m -XX:MaxMetaspaceSize=192m"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ustudent
+      SPRING_DATASOURCE_USERNAME: ustudent
+      SPRING_DATASOURCE_PASSWORD: ustudent123
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  ai:
+    image: ustudent-ai:latest
+    container_name: ustudent-ai
+    restart: unless-stopped
+    mem_limit: 1200m
+    env_file:
+      - /home/ubuntu/ustudent-ai/.env
+      - /home/ubuntu/uplus-stack/ops.env
+    environment:
+      USTUDENT_BACKEND_URL: http://backend:8080
+      OPS_DB_PATH: /app/runtime/ops.sqlite3
+      OPS_WEB_ACCESS_LOG_PATH: /app/web-logs/access.log
+      OPS_TRUSTED_PROXY_NETWORKS: 172.16.0.0/12
+    ports:
+      - "8000:8000"
+    volumes:
+      - ai_ops_data:/app/runtime
+      - /home/ubuntu/uplus-web-logs:/app/web-logs:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  frontend:
+    image: uplusdockerhub/ustudent-frontend:latest
+    container_name: ustudent-frontend
+    restart: unless-stopped
+    mem_limit: 160m
+    ports:
+      - "80:80"
+    volumes:
+      - /home/ubuntu/uplus-nginx-main.conf:/etc/nginx/nginx.conf:ro
+      - /home/ubuntu/uplus-web-logs:/var/log/nginx
+    depends_on:
+      backend:
+        condition: service_healthy
+      ai:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+    name: uplus-postgres-data
+  ai_ops_data:
+    name: ustudent-ai-ops

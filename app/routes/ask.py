@@ -15,6 +15,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
 from app.llm import chat
+from app.ops.context import annotate_input
 
 router = APIRouter()
 
@@ -95,6 +96,7 @@ def build_v3_messages(handbook: str, question: str) -> list[dict]:
 
 @router.post("/ask", response_model=AskV1Response)
 def ask_v1_endpoint(req: AskRequest) -> AskV1Response:
+    annotate_input(req.question)
     messages = build_v1_messages(HANDBOOK_TEXT, req.question)
     answer = chat(messages, temperature=0)
     return AskV1Response(answer=answer)
@@ -102,6 +104,7 @@ def ask_v1_endpoint(req: AskRequest) -> AskV1Response:
 
 @router.post("/ask/v2", response_model=AskV2Response)
 def ask_v2_endpoint(req: AskRequest) -> AskV2Response:
+    annotate_input(req.question)
     messages = build_v2_messages(HANDBOOK_TEXT, req.question)
     answer = chat(messages, temperature=0)
     return AskV2Response(answer=answer)
@@ -109,6 +112,7 @@ def ask_v2_endpoint(req: AskRequest) -> AskV2Response:
 
 @router.post("/ask/v3", response_model=AskV3Response)
 def ask_v3_endpoint(req: AskRequest) -> AskV3Response:
+    annotate_input(req.question)
     messages = build_v3_messages(HANDBOOK_TEXT, req.question)
     raw = chat(
         messages,

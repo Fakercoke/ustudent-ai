@@ -28,6 +28,30 @@ class Settings(BaseSettings):
     ai_service_port: int = 8000
     log_level: str = "INFO"
 
+    # Lightweight operations dashboard.  The password is intentionally empty
+    # by default: /ops stays disabled until a deployment supplies a secret.
+    ops_db_path: str = "data/ops.sqlite3"
+    ops_admin_username: str = "admin"
+    ops_admin_password: str = ""
+    ops_hash_salt: str = "ustudent-ai-local"
+    ops_retention_days: int = 90
+    ops_allow_insecure_http: bool = False
+    ops_insecure_allowed_clients: str = "127.0.0.1,::1"
+    ops_trusted_proxy_networks: str = ""
+    ops_web_access_log_path: str = ""
+    ops_web_log_max_bytes: int = 100_000_000
+    ops_web_cache_seconds: int = 15
+    ops_web_routes: str = "/,/login,/dashboard,/ai-chat"
+
+    # Provider prices per one million tokens.  They are configuration rather
+    # than hard-coded facts because model pricing changes independently of the
+    # application.  A zero value means "show tokens, cost not configured".
+    llm_cost_currency: str = "CNY"
+    llm_cost_note: str = ""
+    llm_input_cost_per_million: float = 0.0
+    llm_cached_input_cost_per_million: float = 0.0
+    llm_output_cost_per_million: float = 0.0
+
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:

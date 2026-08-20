@@ -1,0 +1,11 @@
+/home/ubuntu/uplus-web-logs/*.log {
+    daily
+    rotate 90
+    maxage 90
+    maxsize 20M
+    missingok
+    notifempty
+    compress
+    delaycompress
+    copytruncate
+}

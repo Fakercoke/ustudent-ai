@@ -6,12 +6,16 @@ from typing import Any
 
 import httpx
 from dotenv import load_dotenv
+from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.messages import HumanMessage, ToolMessage
+from langchain_core.outputs import LLMResult
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.prebuilt import create_react_agent
 
+from app.config import get_settings
+from app.ops.context import RequestTrace, current_trace, record_llm_call
 from app.rag.pipeline import rag_answer
 
 load_dotenv()
@@ -133,7 +137,8 @@ policy information. Never claim enrolment succeeded unless enrol returned a
 success message. If a tool returns an error or rejection, report it honestly.
 """
 
-_base_url = os.environ.get("LLM_BASE_URL", "https://api.groq.com/openai/v1")
+_settings = get_settings()
+_base_url = _settings.llm_base_url
 _extra_body = (
     {"thinking": {"type": "disabled"}}
     if "api.deepseek.com" in _base_url
@@ -141,9 +146,11 @@ _extra_body = (
 )
 
 llm = ChatOpenAI(
-    api_key=os.environ["LLM_API_KEY"],
+    # Keep import/health/tests available before a key is configured.  A real
+    # Agent call still fails honestly at the provider boundary.
+    api_key=_settings.llm_api_key or "not-configured",
     base_url=_base_url,
-    model=os.environ.get("LLM_MODEL", "openai/gpt-oss-120b"),
+    model=_settings.llm_model,
     temperature=0.1,
     extra_body=_extra_body,
 )
@@ -157,6 +164,56 @@ agent = create_react_agent(
     state_modifier=SYSTEM_PROMPT,
     checkpointer=memory,
 )
+
+
+class OpsLLMCallback(BaseCallbackHandler):
+    """Record each Agent model call immediately, including failed turns.
+
+    Reading usage only after `agent.invoke()` returns loses both the error and
+    any earlier successful ReAct step when a later call fails.  A per-request
+    callback receives every model completion/error at the correct boundary.
+    """
+
+    def __init__(self, model: str, trace: RequestTrace | None = None) -> None:
+        self.model = model
+        self.trace = trace or current_trace()
+
+    def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
+        output = response.llm_output or {}
+        usage = output.get("token_usage", {}) or {}
+        model = str(output.get("model_name") or self.model)
+
+        prompt = int(usage.get("prompt_tokens", 0) or 0)
+        completion = int(usage.get("completion_tokens", 0) or 0)
+        total = int(usage.get("total_tokens", 0) or 0)
+        details = usage.get("prompt_tokens_details", {}) or {}
+        cached = int(
+            usage.get("prompt_cache_hit_tokens", details.get("cached_tokens", 0)) or 0
+        )
+
+        # Some provider adapters expose usage on the returned AIMessage rather
+        # than LLMResult.llm_output. Sum it only when the aggregate is absent.
+        if not (prompt or completion or total):
+            for batch in response.generations:
+                for generation in batch:
+                    metadata = getattr(getattr(generation, "message", None), "usage_metadata", None) or {}
+                    prompt += int(metadata.get("input_tokens", 0) or 0)
+                    completion += int(metadata.get("output_tokens", 0) or 0)
+                    total += int(metadata.get("total_tokens", 0) or 0)
+                    input_details = metadata.get("input_token_details", {}) or {}
+                    cached += int(input_details.get("cache_read", 0) or 0)
+
+        record_llm_call(
+            model=model,
+            prompt_tokens=prompt,
+            cached_prompt_tokens=cached,
+            completion_tokens=completion,
+            total_tokens=total,
+            trace=self.trace,
+        )
+
+    def on_llm_error(self, error: BaseException, **kwargs: Any) -> None:
+        record_llm_call(model=self.model, success=False, trace=self.trace)
 
 
 def chat_with_trace(message: str, thread_id: str) -> dict[str, Any]:
@@ -173,6 +230,7 @@ def chat_with_trace(message: str, thread_id: str) -> dict[str, Any]:
         config={
             "configurable": {"thread_id": thread_id},
             "recursion_limit": 15,
+            "callbacks": [OpsLLMCallback(_settings.llm_model)],
         },
     )
     messages = result["messages"]

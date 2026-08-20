@@ -39,6 +39,8 @@ docker run -d \
   --name "$NAME" \
   --restart unless-stopped \
   --env-file .env \
+  -e OPS_DB_PATH=/app/runtime/ops.sqlite3 \
+  -v ustudent-ai-ops:/app/runtime \
   -p "${PORT}:8000" \
   --memory 1500m \
   --health-cmd 'curl -fsS http://localhost:8000/health || exit 1' \

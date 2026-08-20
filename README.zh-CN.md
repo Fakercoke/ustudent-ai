@@ -106,6 +106,10 @@ Pytest · Docker · Docker Compose · PostgreSQL · Nginx · Tencent Cloud
 
 ## 运营与 RAG 质量后台
 
+![UStudent AI RAG 运营后台脱敏预览](docs/assets/ops-dashboard-demo.svg)
+
+> **作品集预览：** 图片使用少量脱敏 Demo 数据。真实后台仍受密码保护，并且只能通过 SSH 隧道访问，因此 GitHub 不会公开后台账号、密码或真实请求数据。
+
 `/ops` 用同一个 request ID 串起一次请求的整条诊断链：
 
 ```text

@@ -81,6 +81,10 @@ Core capabilities:
 
 ## Operations and RAG quality dashboard
 
+![Redacted preview of the UStudent AI RAG operations dashboard](docs/assets/ops-dashboard-demo.svg)
+
+> **Portfolio preview:** the image uses a small, redacted demo snapshot. The live dashboard remains password-protected and is reachable only through an SSH tunnel, so operational credentials and request data are never exposed on GitHub.
+
 The `/ops` dashboard joins signals from one request under the same request ID:
 
 ```text

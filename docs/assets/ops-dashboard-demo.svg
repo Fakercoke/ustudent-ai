@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" role="img" aria-labelledby="title desc">
+  <title id="title">UStudent AI RAG operations dashboard preview</title>
+  <desc id="desc">A redacted portfolio preview showing web traffic, RAG outcomes, token usage, evaluation scores and a diagnostic workflow.</desc>
+  <defs>
+    <linearGradient id="header" x1="0" x2="1">
+      <stop offset="0" stop-color="#0d2e67"/>
+      <stop offset="1" stop-color="#165eb5"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#1f345c" flood-opacity=".09"/>
+    </filter>
+    <style>
+      .ui{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+      .card{fill:#fff;stroke:#dfe5ef;stroke-width:1;filter:url(#shadow)}
+      .label{font-size:15px;fill:#68738a}
+      .value{font-size:32px;font-weight:750;fill:#14213d}
+      .hint{font-size:13px;fill:#68738a}
+      .panel-title{font-size:20px;font-weight:700;fill:#14213d}
+      .panel-desc{font-size:13px;fill:#68738a}
+      .small-title{font-size:15px;font-weight:650;fill:#14213d}
+      .pill{font-size:12px;font-weight:650}
+    </style>
+  </defs>
+
+  <rect width="1400" height="900" fill="#f4f7fb"/>
+  <rect width="1400" height="135" fill="url(#header)"/>
+  <g class="ui">
+    <text x="68" y="58" fill="#fff" font-size="30" font-weight="760">UStudent AI · RAG 运营后台</text>
+    <text x="68" y="91" fill="#fff" opacity=".8" font-size="16">从访问与费用，到检索、阈值、生成和 Agent 的分层诊断</text>
+    <rect x="1160" y="42" width="166" height="42" rx="10" fill="#fff" opacity=".13" stroke="#fff" stroke-opacity=".3"/>
+    <text x="1243" y="68" fill="#fff" text-anchor="middle" font-size="14">最近 7 天 · DEMO</text>
+
+    <rect x="52" y="160" width="1296" height="48" rx="12" fill="#e8f1ff" stroke="#bfd4f4"/>
+    <text x="72" y="190" fill="#244977" font-size="14">脱敏预览：线上信号用于定位问题，RAG 正确率由固定 dev / golden 评测单独验证。</text>
+
+    <!-- Metric cards -->
+    <g transform="translate(52 228)">
+      <rect class="card" width="304" height="122" rx="15"/>
+      <text class="label" x="20" y="30">React 网页访问</text><text class="value" x="20" y="74">54</text><text class="hint" x="20" y="101">隐私最小化 Nginx 页面请求</text>
+    </g>
+    <g transform="translate(382 228)">
+      <rect class="card" width="304" height="122" rx="15"/>
+      <text class="label" x="20" y="30">AI / API 请求</text><text class="value" x="20" y="74">3</text><text class="hint" x="20" y="101">通过 request ID 串联诊断链</text>
+    </g>
+    <g transform="translate(712 228)">
+      <rect class="card" width="304" height="122" rx="15"/>
+      <text class="label" x="20" y="30">RAG 已回答</text><text class="value" x="20" y="74">1 / 2</text><text class="hint" x="20" y="101">另 1 次触发有依据的兜底</text>
+    </g>
+    <g transform="translate(1042 228)">
+      <rect class="card" width="306" height="122" rx="15"/>
+      <text class="label" x="20" y="30">RAG 兜底率</text><text class="value" x="20" y="74">50.0%</text><text class="hint" x="20" y="101">继续查看失败发生在哪一层</text>
+    </g>
+    <g transform="translate(52 368)">
+      <rect class="card" width="304" height="122" rx="15"/>
+      <text class="label" x="20" y="30">LLM Token</text><text class="value" x="20" y="74">2,825</text><text class="hint" x="20" y="101">输入、缓存输入与输出分别记录</text>
+    </g>
+    <g transform="translate(382 368)">
+      <rect class="card" width="304" height="122" rx="15"/>
+      <text class="label" x="20" y="30">估算费用</text><text class="value" x="20" y="74">¥0.0041</text><text class="hint" x="20" y="101">按 DeepSeek 配置单价估算</text>
+    </g>
+    <g transform="translate(712 368)">
+      <rect class="card" width="304" height="122" rx="15"/>
+      <text class="label" x="20" y="30">Agent 工具轨迹</text><text class="value" x="20" y="74">get_course</text><text class="hint" x="20" y="101">记录工具选择，不保存原始隐私数据</text>
+    </g>
+    <g transform="translate(1042 368)">
+      <rect class="card" width="306" height="122" rx="15"/>
+      <text class="label" x="20" y="30">服务端错误</text><text class="value" x="20" y="74" fill="#16855b">0</text><text class="hint" x="20" y="101">HTTP 5xx 请求</text>
+    </g>
+
+    <!-- Quality panel -->
+    <g transform="translate(52 516)">
+      <rect class="card" width="760" height="326" rx="16"/>
+      <text class="panel-title" x="24" y="38">离线 RAG 质量</text>
+      <text class="panel-desc" x="24" y="63">固定评测集验证拒答、检索命中和回答落地，不用线上距离冒充正确率。</text>
+
+      <rect x="24" y="88" width="712" height="91" rx="12" fill="#f7f9fd"/>
+      <text class="small-title" x="44" y="116">golden · 8 题</text>
+      <text class="label" x="44" y="148">拒答准确</text><text x="152" y="150" fill="#16855b" font-size="22" font-weight="750">100%</text>
+      <text class="label" x="285" y="148">检索命中</text><text x="385" y="150" fill="#16855b" font-size="22" font-weight="750">100%</text>
+      <text class="label" x="520" y="148">答案落地</text><text x="620" y="150" fill="#16855b" font-size="22" font-weight="750">100%</text>
+
+      <rect x="24" y="194" width="712" height="91" rx="12" fill="#f7f9fd"/>
+      <text class="small-title" x="44" y="222">dev · 22 题</text>
+      <text class="label" x="44" y="254">拒答准确</text><text x="152" y="256" fill="#1649a3" font-size="22" font-weight="750">95.5%</text>
+      <text class="label" x="285" y="254">检索命中</text><text x="385" y="256" fill="#1649a3" font-size="22" font-weight="750">93.8%</text>
+      <text class="label" x="520" y="254">答案落地</text><text x="620" y="256" fill="#1649a3" font-size="22" font-weight="750">93.8%</text>
+      <text class="hint" x="24" y="309">评测结果和线上请求分开保存，避免把“看起来正常”误当成“回答正确”。</text>
+    </g>
+
+    <!-- Diagnosis panel -->
+    <g transform="translate(836 516)">
+      <rect class="card" width="512" height="326" rx="16"/>
+      <text class="panel-title" x="24" y="38">问题分层与修改方向</text>
+      <text class="panel-desc" x="24" y="63">先定位坏在哪层，再决定改数据、阈值、Prompt、模型还是工具。</text>
+
+      <g transform="translate(24 88)">
+        <rect width="464" height="48" rx="10" fill="#f8faff" stroke="#dfe5ef"/>
+        <circle cx="18" cy="24" r="6" fill="#c23d4b"/><text class="small-title" x="36" y="21">retrieval_empty / distance_gate</text><text class="hint" x="36" y="38">检查索引、embedding、sources 与查询归一化</text>
+      </g>
+      <g transform="translate(24 146)">
+        <rect width="464" height="48" rx="10" fill="#f8faff" stroke="#dfe5ef"/>
+        <circle cx="18" cy="24" r="6" fill="#b76b00"/><text class="small-title" x="36" y="21">model_abstention</text><text class="hint" x="36" y="38">人工看 sources：证据够再改 Prompt，证据不足仍改检索</text>
+      </g>
+      <g transform="translate(24 204)">
+        <rect width="464" height="48" rx="10" fill="#f8faff" stroke="#dfe5ef"/>
+        <circle cx="18" cy="24" r="6" fill="#c23d4b"/><text class="small-title" x="36" y="21">generation_failure / llm_error</text><text class="hint" x="36" y="38">检查 Key、余额、模型名、超时与结构化返回</text>
+      </g>
+      <g transform="translate(24 262)">
+        <rect width="464" height="48" rx="10" fill="#f8faff" stroke="#dfe5ef"/>
+        <circle cx="18" cy="24" r="6" fill="#16855b"/><text class="small-title" x="36" y="21">agent_tool_used</text><text class="hint" x="36" y="38">工具没选对改路由；工具结果错查后端 API</text>
+      </g>
+    </g>
+
+    <text x="700" y="878" text-anchor="middle" fill="#68738a" font-size="12">Portfolio preview with redacted demo metrics · the production dashboard remains private behind an SSH tunnel</text>
+  </g>
+</svg>

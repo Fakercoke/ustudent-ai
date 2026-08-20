@@ -94,9 +94,9 @@ def get_course(course_code: str) -> str:
 
 @tool
 def enrol(student_id: int, course_code: str) -> str:
-    """Enrol a student in a course by course code. This changes real backend
-    data, so call it only when the user explicitly asks to enrol and supplies a
-    student ID. Returns the backend's success or rejection reason.
+    """Enrol a student in a course by course code. This changes simulated
+    backend state, so call it only when the user explicitly asks to enrol and
+    supplies a student ID. Returns the backend's success or rejection reason.
     """
     try:
         course = _find_course(course_code)

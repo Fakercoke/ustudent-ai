@@ -198,6 +198,9 @@
       "id": "d16",
       "q": "CS101 一共有多少学分",
       "must_contain": "CS101",
+      "expected_heading_any_of": [
+        "CS101 — Introduction to Computer Science"
+      ],
       "in_handbook": true,
       "expected_source_section": "courses-catalog CS101 — Chinese",
       "answer_any_of": [

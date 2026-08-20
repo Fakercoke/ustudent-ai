@@ -16,7 +16,7 @@
 
 | Engineering result | Measured outcome |
 |---|---:|
-| Automated tests | **158 passed** |
+| Automated tests | **160 passed** |
 | Held-out RAG evaluation | **8/8 (100%)** |
 | Development evaluation | **20/22 (91%)** |
 | Chinese retrieval distance | **0.684 → 0.270** |
@@ -31,7 +31,7 @@
 
 - Engineered a production-oriented RAG and LangGraph Agent service using FastAPI, ChromaDB and an OpenAI-compatible LLM client, enabling grounded policy Q&A, live course lookup, multi-turn memory and controlled enrolment actions.
 - Diagnosed multilingual and typo-related embedding failures through controlled chunking and vector-similarity experiments; introduced constrained query normalisation and a two-layer abstention strategy, improving Chinese retrieval distance from **0.684 to 0.270** and achieving **8/8 held-out evaluation accuracy**.
-- Built deterministic RAG evaluation, PII redaction, prompt-injection screening and a password-protected operations dashboard with **158 automated tests**, then integrated the service with a course-provided React/Spring Boot/PostgreSQL system and deployed the four-service stack to Tencent Cloud using Docker Compose.
+- Built deterministic RAG evaluation, PII redaction, prompt-injection screening and a password-protected operations dashboard with **160 automated tests**, then integrated the service with a course-provided React/Spring Boot/PostgreSQL system and deployed the four-service stack to Tencent Cloud using Docker Compose.
 
 ## System architecture
 
@@ -192,7 +192,7 @@ app/
 data/                     handbook, FAQ and course catalogue
 data/golden/              evaluation datasets
 scripts/                  indexing, evaluation and deployment scripts
-tests/                    158 automated tests
+tests/                    160 automated tests
 docs/portfolio/           experiment records and interview notes
 ```
 

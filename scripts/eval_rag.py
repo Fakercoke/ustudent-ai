@@ -64,6 +64,28 @@ def answer_tokens(item: dict, fact: str) -> list[str]:
     return item.get("answer_any_of") or GOLDEN_ANSWER_TOKENS.get(item["id"]) or [fact]
 
 
+def retrieval_contains_expected_fact(item: dict, fact: str, sources: list[dict]) -> bool:
+    """Require the fact and, when specified, the expected heading in one chunk.
+
+    Identifier-like facts such as ``CS101`` often occur in prerequisite and
+    notes chunks.  Counting any mention as a hit gave a false positive when
+    the actual CS101 course section ranked fourth and never reached Top-3.
+    """
+    expected_headings = [
+        heading.casefold()
+        for heading in item.get("expected_heading_any_of", [])
+    ]
+    for source in sources:
+        if fact not in source["text"]:
+            continue
+        if not expected_headings or any(
+            heading in source.get("heading", "").casefold()
+            for heading in expected_headings
+        ):
+            return True
+    return False
+
+
 def run(name: str, verbose: bool = True) -> dict:
     items = json.loads(SETS[name].read_text())["items"]
     rows, refusal_ok, grounded, retrieved, answerable = [], 0, 0, 0, 0
@@ -78,7 +100,7 @@ def run(name: str, verbose: bool = True) -> dict:
         if it["in_handbook"] and fact:
             answerable += 1
             # Retrieval is checked against the verbatim corpus phrase.
-            in_sources = any(fact in h["text"] for h in r.sources)
+            in_sources = retrieval_contains_expected_fact(it, fact, r.sources)
             # The answer is checked against short, language-neutral tokens.
             # An English phrase can never appear inside a Chinese answer, so
             # reusing `fact` here would score every 中文 question as a failure.

@@ -16,7 +16,7 @@
 
 | 工程指标 | 实测结果 |
 |---|---:|
-| 自动化测试 | **160 passed** |
+| 自动化测试 | **161 passed** |
 | Held-out RAG 评测 | **8/8（100%）** |
 | 开发集评测 | **20/22（91%）** |
 | 中文检索距离 | **0.684 → 0.270** |
@@ -29,7 +29,7 @@
 
 - 基于 FastAPI、ChromaDB 和 LangGraph 独立实现选课场景 AI 服务，支持学生手册 RAG 问答、实时课程查询、多轮上下文记忆及受控选课工具调用。
 - 通过三组切块对照和词向量实验定位 embedding 对中文、短问题及拼写错误的脆弱性，设计查询归一化与双层拒答机制，使中文检索距离由 **0.684 降至 0.270**，held-out 评测达到 **8/8**。
-- 搭建确定性 RAG 评测、PII 脱敏、Prompt Injection 防护及密码保护的运营后台，完成 **160 个自动化测试**；将 AI 服务接入课程提供的 React/Spring Boot/PostgreSQL 系统，并通过 Docker Compose 部署至腾讯云。
+- 搭建确定性 RAG 评测、PII 脱敏、Prompt Injection 防护及密码保护的运营后台，完成 **161 个自动化测试**；将 AI 服务接入课程提供的 React/Spring Boot/PostgreSQL 系统，并通过 Docker Compose 部署至腾讯云。
 
 ## 系统架构
 
@@ -67,7 +67,7 @@ UStudent AI 是一个接入现有大学选课系统的智能服务。学生可�
 - 针对中文、口语、短问题和拼写错误加入受约束的查询归一化。
 - 建立 dev 与 held-out 两套评测集，最终 dev **20/22**、golden **8/8**。
 - 完成 PII 脱敏和检索材料 Prompt Injection 拦截。
-- 全仓自动化测试 **160 passed**。
+- 全仓自动化测试 **161 passed**。
 - 实现轻量运营后台，统一查看请求量、RAG 距离与失败分层、Agent 工具轨迹、模型 Token/估算费用、离线评测结果，并可打印或导出周报。
 - 使用 Docker Compose 将前端、后端、PostgreSQL 和自定义 AI 服务部署至腾讯云，并配置持久化、健康检查、反向代理和自动重启。
 
@@ -121,7 +121,7 @@ React 主站通过最外层 Nginx 的隐私最小化 JSON 日志统计页面入�
 
 ## 面试版项目描述
 
-> 独立实现并部署了大学选课场景的 RAG + Agent 服务：使用 Chroma 构建学生手册知识库，通过 LangGraph Agent 编排政策问答、课程查询和选课工具；针对中文、口语及拼写错误设计查询归一化与双层拒答机制，并通过受控实验定位 embedding 对短文本错拼的脆弱性。建立 dev/held-out 双评测与轻量运营诊断后台，完成 PII 脱敏和 Prompt Injection 防护，最终实现 160 个自动化测试通过、golden 集 8/8，并以 Docker Compose 集成现有 React/Spring Boot/PostgreSQL 系统部署至腾讯云。
+> 独立实现并部署了大学选课场景的 RAG + Agent 服务：使用 Chroma 构建学生手册知识库，通过 LangGraph Agent 编排政策问答、课程查询和选课工具；针对中文、口语及拼写错误设计查询归一化与双层拒答机制，并通过受控实验定位 embedding 对短文本错拼的脆弱性。建立 dev/held-out 双评测与轻量运营诊断后台，完成 PII 脱敏和 Prompt Injection 防护，最终实现 161 个自动化测试通过、golden 集 8/8，并以 Docker Compose 集成现有 React/Spring Boot/PostgreSQL 系统部署至腾讯云。
 
 ## 项目边界
 

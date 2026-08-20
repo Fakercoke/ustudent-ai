@@ -91,7 +91,10 @@ def run(name: str, verbose: bool = True) -> dict:
     rows, refusal_ok, grounded, retrieved, answerable = [], 0, 0, 0, 0
 
     for it in items:
-        r = rag_answer(it["q"])
+        # Evaluation must be deterministic. Serving uses temperature 0.1, but
+        # an unchanged system should not receive a different regression score
+        # merely because the generator sampled another phrasing.
+        r = rag_answer(it["q"], temperature=0.0)
         should_refuse = not it["in_handbook"]
         ref_ok = r.used_fallback == should_refuse
         refusal_ok += ref_ok

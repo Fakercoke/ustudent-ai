@@ -99,7 +99,23 @@ def test_search_can_skip_normalisation(monkeypatch):
         raise AssertionError("rewrite must not run when normalise=False")
 
     monkeypatch.setattr(query_mod, "rewrite_query", boom)
-    from app.rag.index import search
 
-    hits = search("毕业需要多少学分", k=1, normalise=False)
+    # Keep this test independent from a developer's pre-built persistent index.
+    # A fresh CI checkout correctly has no data/chroma_db collection yet.
+    import app.rag.index as index_mod
+
+    class FakeCollection:
+        def query(self, *, query_texts, n_results):
+            assert query_texts == ["毕业需要多少学分"]
+            assert n_results == 1
+            return {
+                "documents": [["Graduation\n\nComplete a minimum of 120 credits."]],
+                "metadatas": [[{"source": "data/handbook.md", "heading": "Graduation"}]],
+                "distances": [[0.3]],
+            }
+
+    monkeypatch.setattr(index_mod, "get_client", lambda: object())
+    monkeypatch.setattr(index_mod, "get_collection", lambda _client: FakeCollection())
+
+    hits = index_mod.search("毕业需要多少学分", k=1, normalise=False)
     assert len(hits) == 1

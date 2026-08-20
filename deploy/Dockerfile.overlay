@@ -1,0 +1,11 @@
+# Fast release path for code-only changes when requirements.txt is unchanged.
+# It reuses the already-tested dependency/model layer, replaces all runtime
+# source, then rebuilds the Chroma index from the release's data directory.
+ARG BASE_IMAGE=ustudent-ai:latest
+FROM ${BASE_IMAGE}
+
+COPY app/ /app/app/
+COPY data/ /app/data/
+COPY scripts/ /app/scripts/
+
+RUN rm -rf /app/chroma_db && python /app/scripts/build_index.py

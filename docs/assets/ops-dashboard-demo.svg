@@ -74,7 +74,7 @@
       <text class="panel-desc" x="24" y="63">固定评测集验证拒答、检索命中和回答落地，不用线上距离冒充正确率。</text>
 
       <rect x="24" y="88" width="712" height="91" rx="12" fill="#f7f9fd"/>
-      <text class="small-title" x="44" y="116">golden · 8 题</text>
+      <text class="small-title" x="44" y="116">课程验收/回归 · 8 题</text>
       <text class="label" x="44" y="148">拒答准确</text><text x="152" y="150" fill="#16855b" font-size="22" font-weight="750">100%</text>
       <text class="label" x="285" y="148">检索命中</text><text x="385" y="150" fill="#16855b" font-size="22" font-weight="750">100%</text>
       <text class="label" x="520" y="148">答案落地</text><text x="620" y="150" fill="#16855b" font-size="22" font-weight="750">100%</text>
@@ -111,6 +111,6 @@
       </g>
     </g>
 
-    <text x="700" y="878" text-anchor="middle" fill="#68738a" font-size="12">Portfolio preview with redacted demo metrics · the production dashboard remains private behind an SSH tunnel</text>
+    <text x="700" y="878" text-anchor="middle" fill="#68738a" font-size="12">UI mockup with redacted demo metrics · the actual dashboard remains private behind an SSH tunnel</text>
   </g>
 </svg>

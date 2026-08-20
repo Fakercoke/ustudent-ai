@@ -87,7 +87,7 @@ bash deploy/install-ops-host.sh
 python scripts/eval_rag.py both
 ```
 
-脚本会分别运行 dev 和 held-out golden 集，并把最新结果写进后台：
+脚本会分别运行 dev 和课程验收/回归集，并把最新结果写进后台。后者参与过早期设计分析，因此不能包装成严格未见过的盲测集：
 
 - 拒答准确率：有答案时是否回答、没答案时是否拒绝；
 - 检索命中率：正确事实是否进入 sources；

@@ -1,5 +1,5 @@
 {
-  "_comment": "Golden set for the ustudent-handbook RAG system. Used informally in lesson 7 for workshop acceptance, formally in lesson 10 for evaluation. Each item has a question, a reference answer, and a flag for whether the handbook actually contains the answer (used to test the 'I don't know' fallback).",
+  "_comment": "Course acceptance/regression set for the ustudent-handbook RAG system. Used informally in lesson 7 for workshop acceptance and formally in lesson 10 for evaluation; it also informed early design analysis, so it is not a strict unseen benchmark. Each item has a question, a reference answer, and a flag for whether the handbook contains the answer (used to test the 'I don't know' fallback).",
   "items": [
     {
       "id": "g1",

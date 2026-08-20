@@ -2,7 +2,7 @@
 """End-to-end evaluation of /rag-ask against a question set.
 
     python scripts/eval_rag.py dev       # tune against this
-    python scripts/eval_rag.py golden    # held out — run once, at the end
+    python scripts/eval_rag.py golden    # course acceptance/regression set
     python scripts/eval_rag.py both
 
 Two things are measured, and they fail for different reasons:
@@ -156,4 +156,4 @@ if __name__ == "__main__":
         for m in results:
             print(f"{m['set']:10}{m['n']:>6}{m['refusal_accuracy']:>10.0%}"
                   f"{m['retrieval_hit']:>10.0%}{m['answer_grounded']:>10.0%}")
-        print("\n  dev 用于调参，golden 是留出集。两者的差值即为过拟合幅度。")
+        print("\n  dev 用于迭代；golden 是课程验收/回归集，曾参与早期设计分析，不是严格盲测。")

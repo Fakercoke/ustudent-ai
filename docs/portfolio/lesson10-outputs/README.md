@@ -6,10 +6,10 @@
 
 | 文件 | 内容 |
 |---|---|
-| `01-eval-golden.txt` | LLM-as-judge · 课程留出集 8 题 |
+| `01-eval-golden.txt` | LLM-as-judge · 课程验收/回归集 8 题（非严格盲测） |
 | `02-eval-dev.txt` | LLM-as-judge · 自建调参集 22 题 |
 | `03-safety-demo.txt` | PII 脱敏 + 注入检测 + 管线拦截 + 真实请求 |
-| `04-pytest.txt` | 全仓测试 |
+| `04-pytest.txt` | Lesson 10 当时的历史测试快照（143 passed）；当前主分支为 161 tests，以 GitHub Actions 为准 |
 
 ## 复现
 

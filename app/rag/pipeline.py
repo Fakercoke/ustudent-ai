@@ -9,13 +9,14 @@ are part of the contract.
 Design decisions and the measurements behind them live in
 `lessons/lesson-06-rag-design/design.md`. Two that shape this file:
 
-  * **top-k = 3.** k=1 satisfies only 50% of the golden set (the right chunk is
-    often ranked 2nd or 3rd); k=5 and k=8 add no accuracy, only prompt cost.
+  * **top-k = 3.** k=1 satisfies only 50% of the course acceptance/regression
+    set (the right chunk is often ranked 2nd or 3rd); k=5 and k=8 add no
+    accuracy, only prompt cost.
 
   * **threshold = 0.75, deliberately loose.** An earlier 0.40 — derived from the
-    golden set's own distance spread — looked perfect on the eight standard
-    questions and rejected real phrasing: "how can i graduate" scores 0.445 and
-    retrieves the correct § Graduation section, yet was refused. A single
+    acceptance set's own distance spread — looked perfect on the eight standard
+    questions and rejected a natural user-style phrasing: "how can i graduate"
+    scores 0.445 and retrieves the correct § Graduation section, yet was refused. A single
     threshold cannot separate that from g8 ("how do I appeal a grade", 0.520,
     genuinely unanswerable); they are 0.075 apart.
 
